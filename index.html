@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lunch Box Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      padding: 20px;
+      text-align: center;
+    }
+    .card {
+      max-width: 450px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      border-radius: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      background: #174a7e;
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    #reader { margin-top: 16px; }
+    #status { margin-top: 16px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Sistem Lunch Box</h2>
+    <p>Halakan kamera iPhone ke QR pekerja.</p>
+    <button id="start" onclick="mulaScan()">Mula Scan</button>
+    <div id="reader"></div>
+    <div id="status">Sedia untuk scan.</div>
+  </div>
+
+  <script>
+    let scanner;
+    let diproses = false;
+
+    async function mulaScan() {
+      const status = document.getElementById('status');
+      if (scanner) return;
+
+      scanner = new Html5Qrcode('reader');
+      status.textContent = 'Meminta kebenaran kamera...';
+
+      try {
+        await scanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          async function(qrId) {
+            if (diproses) return;
+            diproses = true;
+            status.textContent = 'QR dibaca: ' + qrId +
+              '\nMenghantar ke sistem...';
+
+            try {
+              const url = new URL(
+                'https://script.google.com/macros/s/AKfycbw9T_hibN1wSALql7-4L_V_Q4doVUD3mPjQkkah9zAEZ9l0SEwysfnc807Fp0YCj8uwww/exec'
+              );
+              url.searchParams.set('page', 'receive');
+              url.searchParams.set('qr', qrId);
+              const response = await fetch(url.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
+              });
+              status.textContent = 'QR dibaca: ' + qrId +
+                '\nPermintaan dihantar. Semak laptop.';
+            } catch (e) {
+              status.textContent = 'QR dibaca: ' + qrId +
+                '\nPenghantaran gagal. ' + e.message;
+            }
+
+            await scanner.stop();
+            scanner = null;
+            diproses = false;
+          },
+          function() {}
+        );
+        status.textContent = 'Kamera aktif. Halakan ke QR pekerja.';
+      } catch (e) {
+        status.textContent = 'Kamera gagal dibuka: ' + e.message;
+        scanner = null;
+      }
+    }
+  </script>
+</body>
+</html>
