@@ -66,8 +66,7 @@
 
             try {
               const url = new URL(
-                'https://script.google.com/macros/s/AKfycbw9T_hibN1wSALql7-4L_V_Q4doVUD3mPjQkkah9zAEZ9l0SEwysfnc807Fp0YCj8uwww/exec'
-              );
+'https://script.google.com/macros/s/AKfycbyKCWENO1xlU4q1wR7Ydd9ee8RUDPTRDnuB3yMEL2gBFqC5_E9Uw75SiaJ_YEGINQRL/exec'              );
               url.searchParams.set('page', 'receive');
               url.searchParams.set('qr', qrId);
               const response = await fetch(url.toString(), {
